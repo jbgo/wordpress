@@ -39,7 +39,7 @@ node.set_unless['wordpress']['salt']['logged_in'] = secure_password
 node.set_unless['wordpress']['salt']['nonce'] = secure_password
 node.save unless Chef::Config[:solo]
 
-directory node['wordpress']['dir'] do
+directory node['wordpress']['parent_dir'] do
   action :create
   if platform_family?('windows')
     rights :read, 'Everyone'
@@ -65,7 +65,7 @@ else
   end
 
   execute "extract-wordpress" do
-    command "tar xf #{Chef::Config[:file_cache_path]}/#{archive} -C #{node['wordpress']['dir']}"
+    command "tar xf #{Chef::Config[:file_cache_path]}/#{archive} -C #{node['wordpress']['parent_dir']}"
     creates "#{node['wordpress']['dir']}/index.php"
   end
 end
@@ -109,7 +109,7 @@ if platform?('windows')
 else
   web_app "wordpress" do
     template "wordpress.conf.erb"
-    docroot node['wordpress']['dir']
+    docroot node['wordpress']['docroot']
     server_name node['fqdn']
     server_aliases node['wordpress']['server_aliases']
     enable true
